@@ -1,0 +1,99 @@
+name: Test Maven Enforcer with Spaces in Paths
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-linux:
+    name: Test on Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Create build.properties (Linux with forward slashes)
+        run: |
+          cat > build.properties << EOF
+          dir.with.spaces=${{ github.workspace }}/test dir with spaces
+          dir.no.spaces=${{ github.workspace }}/test-dir-no-spaces
+          EOF
+          cat build.properties
+
+      - name: Verify directories exist
+        run: |
+          ls -la "${{ github.workspace }}/test dir with spaces"
+          ls -la "${{ github.workspace }}/test-dir-no-spaces"
+
+      - name: Run Maven verify
+        run: mvn verify
+
+  test-macos:
+    name: Test on macOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Create build.properties (macOS with forward slashes)
+        run: |
+          cat > build.properties << EOF
+          dir.with.spaces=${{ github.workspace }}/test dir with spaces
+          dir.no.spaces=${{ github.workspace }}/test-dir-no-spaces
+          EOF
+          cat build.properties
+
+      - name: Verify directories exist
+        run: |
+          ls -la "${{ github.workspace }}/test dir with spaces"
+          ls -la "${{ github.workspace }}/test-dir-no-spaces"
+
+      - name: Run Maven verify
+        run: mvn verify
+
+  test-windows:
+    name: Test on Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Create build.properties (Windows with backslashes)
+        shell: pwsh
+        run: |
+          $workspace = "${{ github.workspace }}" -replace '/', '\'
+          @"
+          dir.with.spaces=$workspace\test dir with spaces
+          dir.no.spaces=$workspace\test-dir-no-spaces
+          "@ | Out-File -FilePath build.properties -Encoding ASCII
+          Get-Content build.properties
+
+      - name: Verify directories exist
+        shell: pwsh
+        run: |
+          Test-Path "${{ github.workspace }}\test dir with spaces" | Should -Be $true
+          Test-Path "${{ github.workspace }}\test-dir-no-spaces" | Should -Be $true
+          dir "${{ github.workspace }}\test dir with spaces"
+          dir "${{ github.workspace }}\test-dir-no-spaces"
+
+      - name: Run Maven verify
+        run: mvn verify
