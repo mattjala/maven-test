@@ -77,21 +77,20 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      - name: Create build.properties (Windows with backslashes)
+      - name: Create build.properties (Windows with forward slashes)
         shell: pwsh
         run: |
-          $workspace = "${{ github.workspace }}" -replace '/', '\'
           @"
-          dir.with.spaces=$workspace\test dir with spaces
-          dir.no.spaces=$workspace\test-dir-no-spaces
+          dir.with.spaces=${{ github.workspace }}/test dir with spaces
+          dir.no.spaces=${{ github.workspace }}/test-dir-no-spaces
           "@ | Out-File -FilePath build.properties -Encoding ASCII
           Get-Content build.properties
 
       - name: Verify directories exist
         shell: pwsh
         run: |
-          Test-Path "${{ github.workspace }}\test dir with spaces" | Should -Be $true
-          Test-Path "${{ github.workspace }}\test-dir-no-spaces" | Should -Be $true
+          Test-Path "${{ github.workspace }}\test dir with spaces"
+          Test-Path "${{ github.workspace }}\test-dir-no-spaces"
           dir "${{ github.workspace }}\test dir with spaces"
           dir "${{ github.workspace }}\test-dir-no-spaces"
 
