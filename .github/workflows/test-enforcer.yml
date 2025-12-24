@@ -80,9 +80,10 @@ jobs:
       - name: Create build.properties (Windows with forward slashes)
         shell: pwsh
         run: |
+          $workspace = "${{ github.workspace }}" -replace '\\', '/'
           @"
-          dir.with.spaces=${{ github.workspace }}/test dir with spaces
-          dir.no.spaces=${{ github.workspace }}/test-dir-no-spaces
+          dir.with.spaces=$workspace/test dir with spaces
+          dir.no.spaces=$workspace/test-dir-no-spaces
           "@ | Out-File -FilePath build.properties -Encoding ASCII
           Get-Content build.properties
 
